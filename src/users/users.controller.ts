@@ -16,15 +16,19 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User, SanitizedUser } from './entities/user.entity';
+import { SanitizedUser, RoleUser } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleUser.adm, RoleUser.dir)
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.createUser(createUserDto);
@@ -40,7 +44,8 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleUser.adm, RoleUser.dir, RoleUser.ens)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query('role') role?: string) {
     const users = await this.usersService.findAll(role);
@@ -82,6 +87,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleUser.adm)
   async remove(@Param('id', ParseIntPipe) id: number) {
     const user = await this.usersService.remove(id);
     return {
