@@ -1,26 +1,42 @@
-import { IsNotEmpty, IsString, MaxLength, IsEmail, MinLength, IsOptional, IsEnum} from "class-validator";
-import { Role } from "../entities/user.entity";
-// import { Unique } from "typeorm";
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsEmail,
+  MinLength,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
+import { RoleUser } from '../entities/user.entity'; // Updated import to use RoleUser
 
 export class CreateUserDto {
-    @IsNotEmpty({message: 'Le nom est requis'})
-    @IsString({message: 'Le nom doit être une chaîne de caractères'})
-    @MinLength(3, {message: 'Le nom doit contenir au moins 3 caractères'})
-    @MaxLength(20, {message: 'Le nom doit contenir au plus 20 caractères'})
-    name: string;
+  @IsOptional()
+  @IsString({ message: 'Le nom doit être une chaîne de caractères' })
+  @MaxLength(80, { message: 'Le nom doit contenir au plus 80 caractères' })
+  nom?: string;
 
-    @IsNotEmpty({message: 'L\'email est requis'})
-    @IsEmail({}, {message: 'L\'email doit être une adresse email valide'})
-    email: string;
-    
-    @IsNotEmpty({message: 'Le mot de passe est requis'})
-    @IsString({message: 'Le mot de passe doit être une chaîne de caractères'})
-    @MinLength(8, {message: 'Le mot de passe doit contenir au moins 8 caractères'})
-    @MaxLength(20, {message: 'Le mot de passe doit contenir au plus 20 caractères'})
-    password: string;
+  @IsOptional()
+  @IsString({ message: 'Le prénom doit être une chaîne de caractères' })
+  @MaxLength(80, { message: 'Le prénom doit contenir au plus 80 caractères' })
+  prenom?: string;
 
-    @IsOptional()
-    @IsEnum(Role, {message: 'Le rôle doit être un rôle valide'})
-    role?: 'admin' | 'user';
-    
+  @IsNotEmpty({ message: "L'email est requis" })
+  @IsEmail({}, { message: "L'email doit être une adresse email valide" })
+  email: string;
+
+  @IsNotEmpty({ message: 'Le mot de passe est requis' })
+  @IsString({ message: 'Le mot de passe doit être une chaîne de caractères' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 8 caractères',
+  })
+  @MaxLength(50, {
+    message: 'Le mot de passe doit contenir au plus 50 caractères',
+  })
+  password: string;
+
+  @IsOptional()
+  @IsEnum(RoleUser, {
+    message: 'Le rôle doit être un rôle valide (adm, dir, ens, par, elv)',
+  })
+  role?: (typeof RoleUser)[keyof typeof RoleUser];
 }

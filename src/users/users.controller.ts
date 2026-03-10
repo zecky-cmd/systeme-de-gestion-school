@@ -12,15 +12,13 @@ import {
   BadRequestException,
   NotFoundException,
   ParseIntPipe,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-
-
 
 @Controller('users')
 export class UsersController {

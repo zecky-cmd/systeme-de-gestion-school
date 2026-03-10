@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { User } from '@prisma/client';
+import { User, RoleUser } from '@prisma/client';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -18,7 +18,8 @@ export interface AuthResponse {
   access_token: string;
   user: {
     id: number;
-    name: string;
+    nom: string | null;
+    prenom: string | null;
     email: string;
     role: string;
   };
@@ -37,10 +38,15 @@ export class AuthService {
     if (existing) {
       throw new ConflictException('Un compte existe déjà avec cet email');
     }
-    const roleForCreate =
-      registerDto.role === 'ADMIN' ? 'admin' : registerDto.role === 'USER' ? 'user' : undefined;
+    let roleForCreate: 'adm' | 'dir' | 'ens' | 'par' | 'elv' | undefined =
+      undefined;
+    if (Object.values(RoleUser).includes(registerDto.role as any)) {
+      roleForCreate = registerDto.role as any;
+    }
+
     const user = await this.usersService.createUser({
-      name: registerDto.name,
+      nom: registerDto.nom,
+      prenom: registerDto.prenom,
       email: registerDto.email,
       password: registerDto.password,
       role: roleForCreate,
@@ -98,7 +104,7 @@ export class AuthService {
 
     // À remplacer par un vrai envoi d'email
     // (pour le dev, le code sera visible dans les logs backend)
-    // eslint-disable-next-line no-console
+
     console.log(`Code de réinitialisation pour ${dto.email} : ${code}`);
   }
 
@@ -118,7 +124,9 @@ export class AuthService {
     });
 
     if (!token || !token.user) {
-      throw new NotFoundException('Code de réinitialisation invalide ou expiré');
+      throw new NotFoundException(
+        'Code de réinitialisation invalide ou expiré',
+      );
     }
 
     await this.usersService.update(token.user.id, {
@@ -138,7 +146,8 @@ export class AuthService {
       access_token,
       user: {
         id: user.id,
-        name: user.name,
+        nom: user.nom,
+        prenom: user.prenom,
         email: user.email,
         role: user.role,
       },

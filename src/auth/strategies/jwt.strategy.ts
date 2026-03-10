@@ -22,7 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload): Promise<User> {
     const user = await this.usersService.findOne(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('Token invalide ou utilisateur introuvable');
+      throw new UnauthorizedException(
+        'Token invalide ou utilisateur introuvable',
+      );
     }
     return user;
   }
