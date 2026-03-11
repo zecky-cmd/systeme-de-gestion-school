@@ -6,23 +6,34 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { ClasseController } from './classe/classe.controller';
 import { ClasseModule } from './classe/classe.module';
-import { MatiereController } from './matiere/matiere.controller';
 import { MatiereModule } from './matiere/matiere.module';
-import { EleveService } from './eleve/eleve.service';
-import { EleveController } from './eleve/eleve.controller';
 import { EleveModule } from './eleve/eleve.module';
 import { AnneeScolaireModule } from './annee-scolaire/annee-scolaire.module';
-import { EtablissementConfigService } from './etablissement_config/etablissement_config.service';
 import { EtablissementConfigModule } from './etablissement_config/etablissement_config.module';
+import { PeriodeModule } from './periode/periode.module';
+import { EnseignantModule } from './enseignant/enseignant.module';
+import { ParentModule } from './parent/parent.module';
+import { ParentEleveModule } from './parent-eleve/parent-eleve.module';
+import { InscriptionModule } from './inscription/inscription.module';
+import { BulletinModule } from './bulletin/bulletin.module';
+import { CreneauModule } from './creneau/creneau.module';
+import { AbsenceModule } from './absence/absence.module';
+import { RubriqueFinanciereModule } from './rubrique-financiere/rubrique-financiere.module';
+import { PaiementModule } from './paiement/paiement.module';
+import { SanctionModule } from './sanction/sanction.module';
+import { MessageModule } from './message/message.module';
+import { ActivityLogModule } from './activity-log/activity-log.module';
+import { MatiereNiveauModule } from './matiere-niveau/matiere-niveau.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
+import { NoteModule } from './note/note.module';
 
 @Module({
   imports: [
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requêtes max par minute
+        ttl: 60000,
+        limit: 100,
       },
     ]),
     DatabaseModule,
@@ -33,16 +44,35 @@ import { EtablissementConfigModule } from './etablissement_config/etablissement_
     EleveModule,
     AnneeScolaireModule,
     EtablissementConfigModule,
+    PeriodeModule,
+    EnseignantModule,
+    ParentModule,
+    ParentEleveModule,
+    InscriptionModule,
+    BulletinModule,
+    CreneauModule,
+    AbsenceModule,
+    RubriqueFinanciereModule,
+    PaiementModule,
+    ActivityLogModule,
+    MatiereNiveauModule,
+    EvaluationModule,
+    NoteModule,
+    RubriqueFinanciereModule,
+    PaiementModule,
+    CreneauModule,
+    AbsenceModule,
+    SanctionModule,
+    MessageModule,
+    BulletinModule,
   ],
-  controllers: [AppController, ClasseController, MatiereController, EleveController],
+  controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    EleveService,
-    EtablissementConfigService,
   ],
 })
 export class AppModule {}
