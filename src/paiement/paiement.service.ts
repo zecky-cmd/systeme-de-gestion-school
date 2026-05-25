@@ -20,24 +20,63 @@ export class PaiementService {
     const user = await this.databaseService.user.findUnique({ where: { id: dto.encaisseParId } });
     if (!user) throw new NotFoundException(`Utilisateur ${dto.encaisseParId} non trouvé`);
 
-    return this.databaseService.paiement.create({
+    const newPaiement = await this.databaseService.paiement.create({
       data: dto as any,
       include: {
-        eleve: { include: { user: true } },
+        eleve: {
+          include: {
+            user: true,
+            inscriptions: {
+              include: {
+                classe: true,
+              },
+            },
+          },
+        },
         rubrique: true,
         encaissePar: true,
       },
     });
+
+    const inscription = newPaiement.eleve.inscriptions[0];
+    return {
+      ...newPaiement,
+      eleve: {
+        ...newPaiement.eleve,
+        classeNom: inscription?.classe?.nom || 'Non inscrit',
+      },
+    };
   }
 
   async findAll(eleveId?: number) {
-    return this.databaseService.paiement.findMany({
+    const paiements = await this.databaseService.paiement.findMany({
       where: eleveId ? { eleveId } : {},
       include: {
         rubrique: true,
-        eleve: { include: { user: true } },
+        eleve: {
+          include: {
+            user: true,
+            inscriptions: {
+              include: {
+                classe: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { datePaiement: 'desc' },
+    });
+
+    // Aplatir pour simplifier la vie au front-end
+    return paiements.map((p) => {
+      const inscription = p.eleve.inscriptions[0];
+      return {
+        ...p,
+        eleve: {
+          ...p.eleve,
+          classeNom: inscription?.classe?.nom || 'Non inscrit',
+        },
+      };
     });
   }
 
@@ -45,13 +84,30 @@ export class PaiementService {
     const payment = await this.databaseService.paiement.findUnique({
       where: { id },
       include: {
-        eleve: { include: { user: true } },
+        eleve: {
+          include: {
+            user: true,
+            inscriptions: {
+              include: {
+                classe: true,
+              },
+            },
+          },
+        },
         rubrique: true,
         encaissePar: true,
       },
     });
     if (!payment) throw new NotFoundException(`Paiement ${id} non trouvé`);
-    return payment;
+
+    const inscription = payment.eleve.inscriptions[0];
+    return {
+      ...payment,
+      eleve: {
+        ...payment.eleve,
+        classeNom: inscription?.classe?.nom || 'Non inscrit',
+      },
+    };
   }
 
   async update(id: number, dto: UpdatePaiementDto) {
