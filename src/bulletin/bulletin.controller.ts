@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe, Patch, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe, Patch, UseGuards, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { BulletinService } from './bulletin.service';
 import { CreateBulletinDto } from './dto/create-bulletin.dto';
 import { CalculClasseDto } from './dto/calcul-classe.dto';
@@ -14,6 +14,33 @@ import { RoleUser } from '../users/entities/user.entity';
 @Controller('bulletin')
 export class BulletinController {
   constructor(private readonly bulletinService: BulletinService) {}
+
+  @Get('stats/globales')
+  @Roles(RoleUser.adm, RoleUser.dir)
+  @ApiOperation({ summary: 'Récupérer les statistiques globales des bulletins' })
+  @ApiQuery({ name: 'periodeId', required: false, description: 'ID de la période' })
+  getGlobalStats(@Query('periodeId') periodeId?: string) {
+    return this.bulletinService.getGlobalStats(periodeId ? +periodeId : undefined);
+  }
+
+  @Get('stats/classes')
+  @Roles(RoleUser.adm, RoleUser.dir)
+  @ApiOperation({ summary: 'Récupérer l\'état d\'avancement des bulletins par classe' })
+  @ApiQuery({ name: 'periodeId', required: true, description: 'ID de la période' })
+  getClassStats(@Query('periodeId', ParseIntPipe) periodeId: number) {
+    return this.bulletinService.getClassStats(periodeId);
+  }
+
+  @Get('classe/:classeId')
+  @Roles(RoleUser.adm, RoleUser.dir, RoleUser.par, RoleUser.elv)
+  @ApiOperation({ summary: 'Récupérer la liste des bulletins d\'une classe' })
+  @ApiQuery({ name: 'periodeId', required: true, description: 'ID de la période' })
+  getBulletinsByClasse(
+    @Param('classeId', ParseIntPipe) classeId: number,
+    @Query('periodeId', ParseIntPipe) periodeId: number,
+  ) {
+    return this.bulletinService.getBulletinsByClasse(classeId, periodeId);
+  }
 
   @Post()
   @Roles(RoleUser.adm, RoleUser.dir)
